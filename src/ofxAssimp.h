@@ -2,10 +2,10 @@
 
 #include "ofMain.h"
 
-#include "assimp/scene.h"
-#include "assimp/config.h"
-#include "assimp/postprocess.h"
-#include "assimp/cimport.h"
+#include "scene.h"
+#include "config.h"
+#include "postprocess.h"
+#include "cimport.h"
 
 namespace ofxAssimp
 {
@@ -85,9 +85,11 @@ public:
 	void draw(bool draw_global);
 	
 	const string& getName() const { return name; }
-	
+
+	inline const ofMatrix4x4& getInitialTransform() const { return initialTransform; }
+
 	inline const ofMatrix4x4& getInitialTransformInv() const { return initialTransformInv; }
-	inline const ofMatrix4x4& getInitialRotationInv() const { return initialRotationInv; }
+	inline const ofMatrix4x4& getInitialRotation() const { return initialRotation; }
 	
 	ofMatrix4x4 getBoneMatrix() const;
 	
@@ -101,8 +103,8 @@ private:
 	Scene *scene;
 	aiNode *node;
 	
-	ofMatrix4x4 initialRotationInv;
-	ofMatrix4x4 initialTransformInv;
+	ofMatrix4x4 initialRotation, initialRotationInv;
+	ofMatrix4x4 initialTransform, initialTransformInv;
 	
 	void setupInitialTransform();
 };
@@ -155,7 +157,7 @@ class ofxAssimp::Scene
 	
 public:
 	
-	Scene() : scene(NULL) {}
+	Scene() : scene(NULL), make_left_handed(false) {}
 	
 	bool load(string path, bool optimize = false);
 	bool load(const ofBuffer &buffer, bool optimize = false, const char* extension = "");
@@ -176,6 +178,8 @@ public:
 	inline const vector<string>& getNodeNames() const { return nodeNames; }
 	Node* getNodeByName(const string& name);
 	
+	void makeLeftHandedCorrdinate();
+	
 protected:
 	
 	const aiScene *scene;
@@ -188,6 +192,8 @@ protected:
 	map<string, Node*> nodes;
 	
 	Resource resource;
+	
+	bool make_left_handed;
 	
 	static Node* nodeSetupVisiter(Scene *s, aiNode *node);
 	

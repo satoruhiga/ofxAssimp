@@ -134,8 +134,10 @@ Node::Node(Scene *scene, aiNode *node) : scene(scene), node(node), ofNode()
 
 void Node::setupInitialTransform()
 {
+	initialRotation = getOrientationQuat();
 	initialRotationInv = getGlobalOrientation().inverse();
-	initialTransformInv = getGlobalTransformMatrix().getInverse();
+	initialTransform = getGlobalTransformMatrix();
+	initialTransformInv = initialTransform.getInverse();
 }
 
 ofMatrix4x4 Node::getBoneMatrix() const
@@ -365,6 +367,9 @@ bool Scene::load(const ofBuffer &buffer, bool optimize, const char* extension)
 		aiProcess_OptimizeMeshes | aiProcess_JoinIdenticalVertices |
 		aiProcess_RemoveRedundantMaterials;
 	
+	if (make_left_handed)
+		flags |= aiProcess_ConvertToLeftHanded;
+	
 	scene = aiImportFileFromMemory(buffer.getBinaryBuffer(), buffer.size(), flags, extension);
 	assert(scene);
 	
@@ -561,3 +566,7 @@ void Scene::setupMeshs()
 	}
 }
 
+void Scene::makeLeftHandedCorrdinate()
+{
+	make_left_handed = true;
+}
