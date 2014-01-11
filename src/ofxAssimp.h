@@ -82,7 +82,8 @@ public:
 	
 	Node(Scene *scene, aiNode *node);
 	
-	void draw(bool draw_global);
+	void draw();
+	void debugDraw(bool draw_global);
 	
 	const string& getName() const { return name; }
 
@@ -103,9 +104,12 @@ private:
 	Scene *scene;
 	aiNode *node;
 	
+	vector<Mesh*> meshes;
+	
 	ofMatrix4x4 initialRotation, initialRotationInv;
 	ofMatrix4x4 initialTransform, initialTransformInv;
 	
+	void setupMeshLink();
 	void setupInitialTransform();
 };
 
@@ -172,7 +176,7 @@ public:
 	
 	inline const aiScene* get() const { return scene; }
 	
-	size_t getNumMesh() const { return meshs.size(); }
+	size_t getNumMesh() const { return meshes.size(); }
 	Mesh* getMesh(size_t index);
 	
 	inline const vector<string>& getNodeNames() const { return nodeNames; }
@@ -186,7 +190,7 @@ protected:
 	
 	ofFile file;
 	
-	vector<Mesh*> meshs;
+	vector<Mesh*> meshes;
 	
 	vector<string> nodeNames;
 	map<string, Node*> nodes;
@@ -198,5 +202,5 @@ protected:
 	static Node* nodeSetupVisiter(Scene *s, aiNode *node);
 	
 	void setupResources();
-	void setupMeshs();
+	void setupMeshes();
 };

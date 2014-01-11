@@ -145,7 +145,19 @@ ofMatrix4x4 Node::getBoneMatrix() const
 	return initialTransformInv * getGlobalTransformMatrix();
 }
 
-void Node::draw(bool draw_global)
+void Node::draw()
+{
+	transformGL();
+	
+	for (int i = 0; i < meshes.size(); i++)
+	{
+		meshes[i]->draw();
+	}
+	
+	restoreTransformGL();
+}
+
+void Node::debugDraw(bool draw_global)
 {
 	Node *p = (Node*)getParent();
 	if (p)
@@ -160,8 +172,22 @@ void Node::draw(bool draw_global)
 	if (draw_global)
 		ofMultMatrix(initialRotationInv);
 	
+	for (int i = 0; i < meshes.size(); i++)
+	{
+		meshes[i]->draw();
+	}
+	
 	ofDrawAxis(0.5);
 	restoreTransformGL();
+}
+
+void Node::setupMeshLink()
+{
+	for (int i = 0; i < node->mNumMeshes; i++)
+	{
+		unsigned int idx = node->mMeshes[i];
+		meshes.push_back(scene->getMesh(idx));
+	}
 }
 
 #pragma mark - Mesh
@@ -261,7 +287,7 @@ void Mesh::setupMesh()
 {
 	name = assimp_mesh->mName.data;
 	
-	ofMesh mesh;
+	mesh.clear();
 	mesh.setMode(OF_PRIMITIVE_TRIANGLES);
 	
 	assert(assimp_mesh->mNumVertices > 0);
@@ -374,7 +400,7 @@ bool Scene::load(const ofBuffer &buffer, bool optimize, const char* extension)
 	assert(scene);
 	
 	setupResources();
-	setupMeshs();
+	setupMeshes();
 }
 
 void Scene::unload()
@@ -396,20 +422,20 @@ void Scene::unload()
 	}
 
 	{
-		for (int i = 0; i < meshs.size(); i++)
+		for (int i = 0; i < meshes.size(); i++)
 		{
-			delete meshs[i];
+			delete meshes[i];
 		}
-		meshs.clear();
+		meshes.clear();
 	}
 }
 
 void Scene::dumpScene()
 {
 	cout << "==== Mesh ====" << endl;
-	for (int i = 0; i < meshs.size(); i++)
+	for (int i = 0; i < meshes.size(); i++)
 	{
-		printf("%03i: %s\n", i, meshs[i]->getName().c_str());
+		printf("%03i: %s\n", i, meshes[i]->getName().c_str());
 	}
 
 	cout << endl;
@@ -423,26 +449,35 @@ void Scene::dumpScene()
 
 void Scene::update()
 {
-	for (int i = 0; i < meshs.size(); i++)
+	for (int i = 0; i < meshes.size(); i++)
 	{
-		meshs[i]->update();
+		meshes[i]->update();
 	}
 }
 
 void Scene::draw()
 {
-	for (int i = 0; i < meshs.size(); i++)
+//	for (int i = 0; i < meshes.size(); i++)
+//	{
+//		meshes[i]->draw();
+//	}
+	
 	{
-		meshs[i]->draw();
+		map<string, Node*>::iterator it = nodes.begin();
+		while (it != nodes.end())
+		{
+			it->second->draw();
+			it++;
+		}
 	}
 }
 
 void Scene::debugDraw(bool draw_global)
 {
 	{
-		for (int i = 0; i < meshs.size(); i++)
+		for (int i = 0; i < meshes.size(); i++)
 		{
-			meshs[i]->debugDraw();
+			meshes[i]->debugDraw();
 		}
 	}
 
@@ -450,7 +485,7 @@ void Scene::debugDraw(bool draw_global)
 		map<string, Node*>::iterator it = nodes.begin();
 		while (it != nodes.end())
 		{
-			it->second->draw(draw_global);
+			it->second->debugDraw(draw_global);
 			it++;
 		}
 	}
@@ -458,7 +493,7 @@ void Scene::debugDraw(bool draw_global)
 
 Mesh* Scene::getMesh(size_t index)
 {
-	return meshs.at(index);
+	return meshes.at(index);
 }
 
 Node* Scene::getNodeByName(const string& name)
@@ -548,20 +583,21 @@ void Scene::setupResources()
 	}
 }
 
-void Scene::setupMeshs()
+void Scene::setupMeshes()
 {
 	nodeSetupVisiter(this, scene->mRootNode);
 	
 	for (int i = 0; i < scene->mNumMeshes; i++)
 	{
 		aiMesh *mesh = scene->mMeshes[i];
-		meshs.push_back(new Mesh(this, mesh));
+		meshes.push_back(new Mesh(this, mesh));
 	}
 
 	map<string, Node*>::iterator it = nodes.begin();
 	while (it != nodes.end())
 	{
 		it->second->setupInitialTransform();
+		it->second->setupMeshLink();
 		it++;
 	}
 }
