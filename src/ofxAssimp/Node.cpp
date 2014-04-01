@@ -11,21 +11,11 @@ Node::Node(Scene* scene, aiNode* node, Node* parent)
 	, parent(parent) {
 	name = node->mName.data;
 
+	if (parent) {
+		parent->children.push_back(this);
+	}
+
 	matrix = toOF(node->mTransformation);
-	updateGlobalMatrixCache();
-
-	//	initialTransform = getGlobalTransformMatrix();
-	//	initialTransformInv = initialTransform.getInverse();
-}
-
-void Node::update(float sec) {
-	if (animation.empty()) return;
-
-	map<double, ofMatrix4x4>::iterator it =
-		animation.lower_bound(sec * tick_par_second);
-	if (it == animation.end()) return;
-
-	matrix = it->second;
 	updateGlobalMatrixCache();
 }
 
@@ -53,22 +43,27 @@ void Node::debugDraw() {
 	ofPushMatrix();
 	{
 		ofMultMatrix(global_rigid_transform);
-		
+
 		for (int i = 0; i < meshes.size(); i++) {
 			meshes[i]->debugDraw();
 		}
-		
-		ofDrawAxis(10);
+	}
+	ofPopMatrix();
+
+	ofPushMatrix();
+	{
+		ofMultMatrix(global_matrix_cache);
+
+		ofDrawAxis(0.2);
 		ofPushStyle();
 		{
 			ofSetColor(255);
+
 			ofNoFill();
-			ofDrawBox(20);
-			
+			ofDrawBox(0.2);
 			ofDrawBitmapString(name, 0, 0);
 		}
 		ofPopStyle();
-
 	}
 	ofPopMatrix();
 }
@@ -99,29 +94,34 @@ void Node::setupNodeAnimation(aiNodeAnim* anim, double tick_par_second) {
 		scales[k.mTime] = k.mValue;
 	}
 
-	aiVector3D translate;
+	aiVector3D position;
 	aiQuaternion rotation;
-	aiVector3D scale;
+	aiVector3D scaling;
+
+	node->mTransformation.Decompose(scaling, rotation, position);
 
 	set<double>::iterator it = time_keys.begin();
 	while (it != time_keys.end()) {
 		double key = *it;
 
-		translate = translates.lower_bound(key)->second;
-		rotation = rotations.lower_bound(key)->second;
-		scale = scales.lower_bound(key)->second;
-
-		ofVec3f s(scale.x, scale.y, scale.z);
-		if (s.lengthSquared() < 0.0001) {
-			s.set(1);
+		if (translates.find(key) != translates.end()) {
+			position = translates[key];
 		}
-		
+
+		if (rotations.find(key) != rotations.end()) {
+			rotation = rotations[key];
+		}
+
+		if (scales.find(key) != scales.end()) {
+			scaling = scales[key];
+		}
+
 		ofMatrix4x4 m;
-		m.glTranslate(translate.x, translate.y, translate.z);
+		m.glTranslate(position.x, position.y, position.z);
 		m.glRotate(
 			ofQuaternion(rotation.x, rotation.y, rotation.z, rotation.w));
-		m.glScale(s);
-		
+		m.glScale(scaling.x, scaling.y, scaling.z);
+
 		animation[key] = m;
 
 		it++;
@@ -134,15 +134,35 @@ void Node::updateGlobalMatrixCache() {
 	} else {
 		global_matrix_cache = matrix * parent->global_matrix_cache;
 	}
-	
+
 	global_rigid_transform.makeIdentityMatrix();
 	global_rigid_transform.setTranslation(global_matrix_cache.getTranslation());
 	global_rigid_transform.setRotate(global_matrix_cache.getRotate());
 }
 
-void Node::addMeshReference(Mesh *mesh) {
+void Node::addMeshReference(Mesh* mesh) {
 	if (find(meshes.begin(), meshes.end(), mesh) != meshes.end()) return;
 	meshes.push_back(mesh);
+}
+
+void Node::updateNodeAnimation(float sec) {
+	if (animation.empty()) return;
+
+	map<double, ofMatrix4x4>::iterator it =
+		animation.lower_bound(sec * tick_par_second);
+	if (it == animation.end()) return;
+
+	matrix = it->second;
+}
+
+void Node::updateNodeAnimationRecursive(Node* node, float sec) {
+	node->updateNodeAnimation(sec);
+	node->updateGlobalMatrixCache();
+
+	for (int i = 0; i < node->children.size(); i++) {
+		Node* child = node->children[i];
+		updateNodeAnimationRecursive(child, sec);
+	}
 }
 
 OFX_ASSIMP_END_NAMESPACE

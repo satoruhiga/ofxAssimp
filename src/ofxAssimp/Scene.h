@@ -50,6 +50,7 @@ protected:
 
 	vector<string> nodeNames;
 	map<string, Node::Ref> nodes;
+	Node::Ref root_node;
 
 	Resource::Ref resource;
 	

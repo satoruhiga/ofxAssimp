@@ -18,7 +18,7 @@ bool Scene::load(const ofBuffer& buffer, bool optimize, const char* extension) {
 	unload();
 
 	unsigned int flags = aiProcessPreset_TargetRealtime_MaxQuality |
-						 aiProcess_Triangulate | aiProcess_FlipUVs;
+						 aiProcess_Triangulate;
 
 	if (optimize) {
 		flags |= aiProcess_ImproveCacheLocality | aiProcess_OptimizeGraph |
@@ -73,15 +73,13 @@ void Scene::update() {
 }
 
 void Scene::update(float sec) {
-	map<string, Node::Ref>::iterator it = nodes.begin();
-	while (it != nodes.end()) {
-		it->second->update(sec);
-		it++;
+	if (root_node) {
+		root_node->updateNodeAnimationRecursive(root_node.get(), sec);
 	}
-
-	for (int i = 0; i < meshes.size(); i++) {
-		meshes[i]->update();
-	}
+	
+//	for (int i = 0; i < meshes.size(); i++) {
+//		meshes[i]->update();
+//	}
 }
 
 void Scene::draw() {
@@ -117,7 +115,7 @@ void Scene::setupNodes() {
 	nodes.clear();
 	nodeNames.clear();
 
-	nodeSetupVisiter(this, scene->mRootNode, NULL);
+	root_node = nodeSetupVisiter(this, scene->mRootNode, NULL);
 }
 
 void Scene::setupMeshes() {
