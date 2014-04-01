@@ -23,30 +23,13 @@ public:
 	
 	const string& getName() const { return name; }
 
-	inline const ofMatrix4x4& getInitialTransform() const {
-		return initialTransform;
-	}
-
-	inline const ofMatrix4x4& getInitialTransformInv() const {
-		return initialTransformInv;
-	}
-
-//	OF_DEPRECATED(ofMatrix4x4 getBoneMatrix() const {
-//		return initialTransformInv * getGlobalTransformMatrix();
-//	});
-
 	aiNode* get() { return node; }
 	const aiNode* get() const { return node; }
+	
+	const ofMatrix4x4& getMatrix() const { return matrix; }
+	const ofMatrix4x4& getGlobalMatrix() const { return global_matrix_cache; }
+	const ofMatrix4x4& getGlobalRigidTransformMatrix() const { return global_rigid_transform; }
 
-	inline void pushMatrix() const {
-		ofPushMatrix();
-		ofMultMatrix(global_matrix_cache);
-	}
-	
-	inline void popMatrix() const {
-		ofPopMatrix();
-	}
-	
 private:
 	string name;
 
@@ -55,18 +38,19 @@ private:
 	
 	Node *parent;
 
-	vector<Mesh::WeakRef> meshes;
-	
 	double tick_par_second;
 	map<double, ofMatrix4x4> animation;
 
 	ofMatrix4x4 initialTransform, initialTransformInv;
 
-	void setupMeshLink();
 	void setupNodeAnimation(aiNodeAnim* anim, double tick_par_second);
 	
 	ofMatrix4x4 matrix, global_matrix_cache;
+	ofMatrix4x4 global_rigid_transform;
 	void updateGlobalMatrixCache();
+	
+	vector<Mesh*> meshes;
+	void addMeshReference(Mesh *mesh);
 };
 
 OFX_ASSIMP_END_NAMESPACE

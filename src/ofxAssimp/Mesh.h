@@ -35,8 +35,7 @@ protected:
 
 	string name;
 
-	ofMesh originalMesh;
-	ofMesh mesh;
+	ofVboMesh mesh;
 
 	map<string, Joint::Ref> joints;
 

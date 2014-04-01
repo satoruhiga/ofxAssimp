@@ -30,53 +30,47 @@ void Node::update(float sec) {
 }
 
 void Node::draw() {
-	pushMatrix();
-	
-	//	for (int i = 0; i < meshes.size(); i++) {
-	//		if (meshes[i].lock())
-	//		{
-	//			// meshes[i]->draw();
-	//		}
-	//	}
-
-	popMatrix();
+	ofPushMatrix();
+	{
+		ofMultMatrix(parent->global_rigid_transform);
+		for (int i = 0; i < meshes.size(); i++) {
+			meshes[i]->draw();
+		}
+	}
+	ofPopMatrix();
 }
 
 void Node::debugDraw() {
 	if (parent) {
-		parent->pushMatrix();
-		ofLine(ofVec3f(0, 0, 0), matrix.getTranslation());
-		parent->popMatrix();
+		ofPushMatrix();
+		{
+			ofMultMatrix(parent->global_matrix_cache);
+			ofLine(ofVec3f(0, 0, 0), matrix.getTranslation());
+		}
+		ofPopMatrix();
 	}
 
-	pushMatrix();
+	ofPushMatrix();
 	{
-		//		for (int i = 0; i < meshes.size(); i++) {
-		//			if (meshes[i].lock())
-		//			{
-		//				// (*meshes[i])->draw();
-		//			}
-		//		}
-
-		ofDrawAxis(0.5);
+		ofMultMatrix(global_rigid_transform);
+		
+		for (int i = 0; i < meshes.size(); i++) {
+			meshes[i]->debugDraw();
+		}
+		
+		ofDrawAxis(10);
 		ofPushStyle();
 		{
 			ofSetColor(255);
 			ofNoFill();
-			ofDrawBox(0.5);
-
+			ofDrawBox(20);
+			
 			ofDrawBitmapString(name, 0, 0);
 		}
 		ofPopStyle();
-	}
-	popMatrix();
-}
 
-void Node::setupMeshLink() {
-	for (int i = 0; i < node->mNumMeshes; i++) {
-		unsigned int idx = node->mMeshes[i];
-		meshes.push_back(scene->getMesh(idx));
 	}
+	ofPopMatrix();
 }
 
 void Node::setupNodeAnimation(aiNodeAnim* anim, double tick_par_second) {
@@ -140,6 +134,15 @@ void Node::updateGlobalMatrixCache() {
 	} else {
 		global_matrix_cache = matrix * parent->global_matrix_cache;
 	}
+	
+	global_rigid_transform.makeIdentityMatrix();
+	global_rigid_transform.setTranslation(global_matrix_cache.getTranslation());
+	global_rigid_transform.setRotate(global_matrix_cache.getRotate());
+}
+
+void Node::addMeshReference(Mesh *mesh) {
+	if (find(meshes.begin(), meshes.end(), mesh) != meshes.end()) return;
+	meshes.push_back(mesh);
 }
 
 OFX_ASSIMP_END_NAMESPACE

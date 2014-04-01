@@ -18,27 +18,27 @@ Mesh::~Mesh() {
 
 
 void Mesh::update() {
-	mesh = originalMesh;
-
-	{
-		vector<ofVec3f> vert = originalMesh.getVertices();
-		vector<ofVec3f> norm = originalMesh.getNormals();
-
-		mesh.getVertices().assign(vert.size(), ofVec3f(0));
-		mesh.getNormals().assign(norm.size(), ofVec3f(0));
-
-		map<string, Joint::Ref>::iterator it = joints.begin();
-		while (it != joints.end()) {
-			Joint::Ref o = it->second;
-			o->updateJointTransform(vert, mesh.getVertices(), norm,
-									mesh.getNormals());
-			it++;
-		}
-
-		for (int i = 0; i < mesh.getNormals().size(); i++) {
-			mesh.getNormals()[i].normalize();
-		}
-	}
+//	mesh = originalMesh;
+//
+//	{
+//		vector<ofVec3f> vert = originalMesh.getVertices();
+//		vector<ofVec3f> norm = originalMesh.getNormals();
+//
+//		mesh.getVertices().assign(vert.size(), ofVec3f(0));
+//		mesh.getNormals().assign(norm.size(), ofVec3f(0));
+//
+//		map<string, Joint::Ref>::iterator it = joints.begin();
+//		while (it != joints.end()) {
+//			Joint::Ref o = it->second;
+//			o->updateJointTransform(vert, mesh.getVertices(), norm,
+//									mesh.getNormals());
+//			it++;
+//		}
+//
+//		for (int i = 0; i < mesh.getNormals().size(); i++) {
+//			mesh.getNormals()[i].normalize();
+//		}
+//	}
 }
 
 void Mesh::draw(ofPolyRenderMode renderType) {
@@ -62,21 +62,21 @@ void Mesh::draw(ofPolyRenderMode renderType) {
 }
 
 void Mesh::debugDraw() {
-	{
-		vector<ofFloatColor>& colors = mesh.getColors();
+//	{
+//		vector<ofFloatColor>& colors = mesh.getColors();
+//
+//		if (colors.size() == 0)
+//			colors.resize(mesh.getNumVertices(), ofFloatColor(0, 0, 0, 1));
+//
+//		map<string, Joint::Ref>::iterator it = joints.begin();
+//		while (it != joints.end()) {
+//			Joint::Ref o = it->second;
+//			o->updateJointColor(colors);
+//			it++;
+//		}
+//	}
 
-		if (colors.size() == 0)
-			colors.resize(mesh.getNumVertices(), ofFloatColor(0, 0, 0, 1));
-
-		map<string, Joint::Ref>::iterator it = joints.begin();
-		while (it != joints.end()) {
-			Joint::Ref o = it->second;
-			o->updateJointColor(colors);
-			it++;
-		}
-	}
-
-	mesh.draw();
+	mesh.drawWireframe();
 }
 
 void Mesh::setupMesh() {
@@ -124,8 +124,6 @@ void Mesh::setupMesh() {
 		mesh.addColors((const ofFloatColor*)assimp_mesh->mColors,
 					   assimp_mesh->mNumVertices);
 	}
-
-	originalMesh = mesh;
 }
 
 void Mesh::setupSkeleton() {
