@@ -2,6 +2,8 @@
 
 #include "Constants.h"
 
+#include "Joint.h"
+
 OFX_ASSIMP_BEGIN_NAMESPACE
 
 class Scene;
@@ -36,7 +38,7 @@ protected:
 	ofMesh originalMesh;
 	ofMesh mesh;
 
-	map<string, Joint*> joints;
+	map<string, Joint::Ref> joints;
 
 	void setupMesh();
 	void setupSkeleton();

@@ -7,14 +7,16 @@ OFX_ASSIMP_BEGIN_NAMESPACE
 
 class Scene;
 
-class Node : public ofNode {
+class Node {
 	friend class Scene;
 
 public:
 	
 	typedef ofPtr<Node> Ref;
 	
-	Node(Scene* scene, aiNode* node);
+	Node(Scene* scene, aiNode* node, Node* parent);
+	
+	void update(float sec);
 	
 	void draw();
 	void debugDraw();
@@ -29,26 +31,42 @@ public:
 		return initialTransformInv;
 	}
 
-	OF_DEPRECATED(ofMatrix4x4 getBoneMatrix() const {
-		return initialTransformInv * getGlobalTransformMatrix();
-	});
+//	OF_DEPRECATED(ofMatrix4x4 getBoneMatrix() const {
+//		return initialTransformInv * getGlobalTransformMatrix();
+//	});
 
 	aiNode* get() { return node; }
 	const aiNode* get() const { return node; }
 
+	inline void pushMatrix() const {
+		ofPushMatrix();
+		ofMultMatrix(global_matrix_cache);
+	}
+	
+	inline void popMatrix() const {
+		ofPopMatrix();
+	}
+	
 private:
 	string name;
 
 	Scene* scene;
 	aiNode* node;
-	aiNodeAnim* anim;
+	
+	Node *parent;
 
 	vector<Mesh::WeakRef> meshes;
+	
+	double tick_par_second;
+	map<double, ofMatrix4x4> animation;
 
 	ofMatrix4x4 initialTransform, initialTransformInv;
 
 	void setupMeshLink();
-	void setupInitialTransform();
+	void setupNodeAnimation(aiNodeAnim* anim, double tick_par_second);
+	
+	ofMatrix4x4 matrix, global_matrix_cache;
+	void updateGlobalMatrixCache();
 };
 
 OFX_ASSIMP_END_NAMESPACE

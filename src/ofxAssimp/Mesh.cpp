@@ -13,11 +13,6 @@ Mesh::Mesh(Scene* scene, aiMesh* assimp_mesh)
 }
 
 Mesh::~Mesh() {
-	map<string, Joint*>::iterator it = joints.begin();
-	while (it != joints.end()) {
-		delete it->second;
-		it++;
-	}
 	joints.clear();
 }
 
@@ -32,9 +27,9 @@ void Mesh::update() {
 		mesh.getVertices().assign(vert.size(), ofVec3f(0));
 		mesh.getNormals().assign(norm.size(), ofVec3f(0));
 
-		map<string, Joint*>::iterator it = joints.begin();
+		map<string, Joint::Ref>::iterator it = joints.begin();
 		while (it != joints.end()) {
-			Joint* o = it->second;
+			Joint::Ref o = it->second;
 			o->updateJointTransform(vert, mesh.getVertices(), norm,
 									mesh.getNormals());
 			it++;
@@ -73,9 +68,9 @@ void Mesh::debugDraw() {
 		if (colors.size() == 0)
 			colors.resize(mesh.getNumVertices(), ofFloatColor(0, 0, 0, 1));
 
-		map<string, Joint*>::iterator it = joints.begin();
+		map<string, Joint::Ref>::iterator it = joints.begin();
 		while (it != joints.end()) {
-			Joint* o = it->second;
+			Joint::Ref o = it->second;
 			o->updateJointColor(colors);
 			it++;
 		}
@@ -137,13 +132,14 @@ void Mesh::setupSkeleton() {
 	// create joints
 	for (int i = 0; i < assimp_mesh->mNumBones; i++) {
 		aiBone* bone = assimp_mesh->mBones[i];
-		joints[bone->mName.data] = new Joint(scene, this, bone);
+		Joint::Ref o = Joint::Ref(new Joint(scene, this, bone));
+		joints[bone->mName.data] = o;
 	}
 
 	{
-		map<string, Joint*>::iterator it = joints.begin();
+		map<string, Joint::Ref>::iterator it = joints.begin();
 		while (it != joints.end()) {
-			Joint* o = it->second;
+			Joint::Ref o = it->second;
 			o->setupGlobalJointPosition();
 			it++;
 		}

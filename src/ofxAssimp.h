@@ -7,3 +7,4 @@
 #include "ofxAssimp/Joint.h"
 #include "ofxAssimp/Mesh.h"
 #include "ofxAssimp/Node.h"
+#include "ofxAssimp/Skin.h"

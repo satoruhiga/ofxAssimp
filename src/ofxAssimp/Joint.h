@@ -2,14 +2,18 @@
 
 #include "Constants.h"
 
-#include "Scene.h"
-
 OFX_ASSIMP_BEGIN_NAMESPACE
+
+class Scene;
+class Node;
 
 class Joint {
 	friend class Mesh;
 	
 public:
+	
+	typedef ofPtr<Joint> Ref;
+	
 	Joint(Scene* scene, Mesh* mesh, aiBone* bone);
 	
 	void updateJointColor(vector<ofFloatColor>& colors);
@@ -26,7 +30,7 @@ protected:
 	
 	Scene* scene;
 	Mesh* mesh;
-	Node::Ref node;
+	Node* node;
 	
 	string name;
 	

@@ -24,7 +24,8 @@ public:
 
 	void dumpScene();
 
-	void update(float delta_time = ofGetLastFrameTime());
+	void update();
+	void update(float sec);
 
 	void draw();
 	void debugDraw();
@@ -51,8 +52,10 @@ protected:
 	map<string, Node::Ref> nodes;
 
 	Resource::Ref resource;
+	
+	double duration;
 
-	static Node::Ref nodeSetupVisiter(Scene* s, aiNode* node);
+	static Node::Ref nodeSetupVisiter(Scene* s, aiNode* node, Node* parent);
 
 	void setupResources();
 	void setupNodes();
