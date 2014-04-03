@@ -1,85 +1,60 @@
 #include "Mesh.h"
 
-#include "Joint.h"
 #include "Scene.h"
+#include "Skin.h"
 
 OFX_ASSIMP_BEGIN_NAMESPACE
 
-Mesh::Mesh(Scene* scene, aiMesh* assimp_mesh)
-	: scene(scene)
-	, assimp_mesh(assimp_mesh) {
-	setupMesh();
-	setupSkeleton();
+Mesh::Mesh(Scene* scene, aiMesh* assimp_mesh) {
+	material = &scene->resource->materials[assimp_mesh->mMaterialIndex];
+	setupMesh(scene, assimp_mesh);
+	setupSkin(scene, assimp_mesh);
 }
 
 Mesh::~Mesh() {
-	joints.clear();
 }
 
-
 void Mesh::update() {
-//	mesh = originalMesh;
-//
-//	{
-//		vector<ofVec3f> vert = originalMesh.getVertices();
-//		vector<ofVec3f> norm = originalMesh.getNormals();
-//
-//		mesh.getVertices().assign(vert.size(), ofVec3f(0));
-//		mesh.getNormals().assign(norm.size(), ofVec3f(0));
-//
-//		map<string, Joint::Ref>::iterator it = joints.begin();
-//		while (it != joints.end()) {
-//			Joint::Ref o = it->second;
-//			o->updateJointTransform(vert, mesh.getVertices(), norm,
-//									mesh.getNormals());
-//			it++;
-//		}
-//
-//		for (int i = 0; i < mesh.getNormals().size(); i++) {
-//			mesh.getNormals()[i].normalize();
-//		}
-//	}
+	if (skin) skin->update();
 }
 
 void Mesh::draw(ofPolyRenderMode renderType) {
-	Material& m = scene->resource->materials[assimp_mesh->mMaterialIndex];
+	material->begin(renderType);
 
-	m.begin(renderType);
-
+	ofMesh *m;
+	if (skin) {
+		m = &skin->getAnimatedMesh();
+	} else {
+		m = &mesh;
+	}
+	
 	switch (renderType) {
 		case OF_MESH_FILL:
-			mesh.drawFaces();
+			m->drawFaces();
 			break;
 		case OF_MESH_POINTS:
-			mesh.drawVertices();
+			m->drawVertices();
 			break;
 		case OF_MESH_WIREFRAME:
-			mesh.drawWireframe();
+			m->drawWireframe();
 			break;
 	}
 
-	m.end();
+	material->end();
 }
 
 void Mesh::debugDraw() {
-//	{
-//		vector<ofFloatColor>& colors = mesh.getColors();
-//
-//		if (colors.size() == 0)
-//			colors.resize(mesh.getNumVertices(), ofFloatColor(0, 0, 0, 1));
-//
-//		map<string, Joint::Ref>::iterator it = joints.begin();
-//		while (it != joints.end()) {
-//			Joint::Ref o = it->second;
-//			o->updateJointColor(colors);
-//			it++;
-//		}
-//	}
+	ofMesh *m;
+	if (skin) {
+		m = &skin->getAnimatedMesh();
+	} else {
+		m = &mesh;
+	}
 
-	mesh.drawWireframe();
+	m->drawWireframe();
 }
 
-void Mesh::setupMesh() {
+void Mesh::setupMesh(Scene* scene, aiMesh* assimp_mesh) {
 	name = assimp_mesh->mName.data;
 
 	mesh.clear();
@@ -126,22 +101,11 @@ void Mesh::setupMesh() {
 	}
 }
 
-void Mesh::setupSkeleton() {
-	// create joints
-	for (int i = 0; i < assimp_mesh->mNumBones; i++) {
-		aiBone* bone = assimp_mesh->mBones[i];
-		Joint::Ref o = Joint::Ref(new Joint(scene, this, bone));
-		joints[bone->mName.data] = o;
-	}
-
-	{
-		map<string, Joint::Ref>::iterator it = joints.begin();
-		while (it != joints.end()) {
-			Joint::Ref o = it->second;
-			o->setupGlobalJointPosition();
-			it++;
-		}
-	}
+void Mesh::setupSkin(Scene* scene, aiMesh* assimp_mesh) {
+	if (assimp_mesh->mNumBones == 0) return;
+	
+	Skin *o = new Skin(scene, assimp_mesh, mesh);
+	skin = Skin::Ref(o);
 }
 
 OFX_ASSIMP_END_NAMESPACE

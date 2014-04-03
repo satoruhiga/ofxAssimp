@@ -28,6 +28,8 @@ public:
 	const ofMatrix4x4& getGlobalMatrix() const { return global_matrix_cache; }
 	const ofMatrix4x4& getGlobalRigidTransformMatrix() const { return global_rigid_transform; }
 
+	Node* getParent() const { return parent; }
+	
 private:
 	
 	aiNode* node;

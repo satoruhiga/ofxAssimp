@@ -21,11 +21,6 @@ static ofFloatColor toOF(const aiColor4D& c) {
 	return ofFloatColor(c.r, c.g, c.b, c.a);
 }
 
-class Node;
-class Joint;
-class Mesh;
-class Resource;
-
 OFX_ASSIMP_END_NAMESPACE
 
 namespace ofxAssimp = ofx::Assimp;

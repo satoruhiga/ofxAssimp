@@ -2,15 +2,15 @@
 
 #include "Constants.h"
 
-#include "Joint.h"
+#include "Skin.h"
 
 OFX_ASSIMP_BEGIN_NAMESPACE
 
 class Scene;
+class Skin;
+class Material;
 
 class Mesh {
-	friend class Joint;
-
 public:
 	
 	typedef ofPtr<Mesh> Ref;
@@ -30,17 +30,15 @@ public:
 	const ofMesh& getMesh() const { return mesh; }
 
 protected:
-	Scene* scene;
-	aiMesh* assimp_mesh;
-
 	string name;
+	
+	Material* material;
 
 	ofVboMesh mesh;
-
-	map<string, Joint::Ref> joints;
-
-	void setupMesh();
-	void setupSkeleton();
+	void setupMesh(Scene* scene, aiMesh* assimp_mesh);
+	
+	Skin::Ref skin;
+	void setupSkin(Scene* scene, aiMesh* assimp_mesh);
 };
 
 OFX_ASSIMP_END_NAMESPACE

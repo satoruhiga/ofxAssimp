@@ -10,7 +10,6 @@ OFX_ASSIMP_BEGIN_NAMESPACE
 
 class Scene {
 	friend class Node;
-	friend class Joint;
 	friend class Mesh;
 
 public:

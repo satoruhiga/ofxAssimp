@@ -11,13 +11,12 @@ public:
 		, twoSided(true)
 		, blendMode(OF_BLENDMODE_ALPHA) {}
 
+	bool twoSided;
 	bool hasGlMaterial;
 	ofMaterial material;
 	ofBlendMode blendMode;
 
 	ofTexture diffuseTex;
-
-	bool twoSided;
 
 	void begin(ofPolyRenderMode renderType) {
 		glPushAttrib(GL_ALL_ATTRIB_BITS);
@@ -27,7 +26,6 @@ public:
 		ofPushStyle();
 
 		if (hasGlMaterial) material.begin();
-
 		if (diffuseTex.isAllocated()) diffuseTex.bind();
 
 		ofEnableBlendMode(blendMode);
@@ -42,7 +40,6 @@ public:
 
 	void end() {
 		if (diffuseTex.isAllocated()) diffuseTex.unbind();
-
 		if (hasGlMaterial) material.end();
 
 		ofPopStyle();
@@ -54,9 +51,7 @@ public:
 
 class Resource {
 public:
-	
 	typedef ofPtr<Resource> Ref;
-	
 	vector<Material> materials;
 };
 

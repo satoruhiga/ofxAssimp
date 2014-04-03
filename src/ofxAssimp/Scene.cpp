@@ -33,7 +33,7 @@ bool Scene::load(const ofBuffer& buffer, bool optimize, const char* extension) {
 	scene = aiImportFileFromMemory(buffer.getBinaryBuffer(), buffer.size(),
 								   flags, extension);
 	assert(scene);
-
+	
 	setupResources();
 	setupNodes();
 	setupMeshes();
@@ -77,9 +77,9 @@ void Scene::update(float sec) {
 		root_node->updateNodeAnimationRecursive(root_node.get(), sec);
 	}
 	
-//	for (int i = 0; i < meshes.size(); i++) {
-//		meshes[i]->update();
-//	}
+	for (int i = 0; i < meshes.size(); i++) {
+		meshes[i]->update();
+	}
 }
 
 void Scene::draw() {

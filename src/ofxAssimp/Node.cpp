@@ -20,9 +20,11 @@ Node::Node(Scene* scene, aiNode* node, Node* parent)
 }
 
 void Node::draw() {
+	if (meshes.empty()) return;
+	
 	ofPushMatrix();
 	{
-		ofMultMatrix(parent->global_rigid_transform);
+		ofMultMatrix(global_rigid_transform);
 		for (int i = 0; i < meshes.size(); i++) {
 			meshes[i]->draw();
 		}
