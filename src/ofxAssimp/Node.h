@@ -16,6 +16,8 @@ public:
 	
 	Node(Scene* scene, aiNode* node, Node* parent);
 	
+	void update();
+	
 	void draw();
 	void debugDraw();
 	
@@ -30,13 +32,14 @@ public:
 
 	Node* getParent() const { return parent; }
 	
+	inline bool hasAnimation() const { return !animation.empty(); }
+	inline bool hasMesh() const { return !meshes.empty(); }
+	
 private:
 	
 	aiNode* node;
 	
 	string name;
-	
-	Scene* scene;
 	
 	Node *parent;
 	vector<Node*> children;
@@ -46,8 +49,8 @@ private:
 	ofMatrix4x4 matrix, global_matrix_cache, global_rigid_transform;
 	void updateGlobalMatrixCache();
 	
-	vector<Mesh*> meshes;
-	void addMeshReference(Mesh *mesh);
+	vector<Mesh::Ref> meshes;
+	void setupMesh(Scene* scene, aiNode* node);
 	
 	double tick_par_second;
 	map<double, ofMatrix4x4> animation;

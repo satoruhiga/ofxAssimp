@@ -36,7 +36,6 @@ bool Scene::load(const ofBuffer& buffer, bool optimize, const char* extension) {
 	
 	setupResources();
 	setupNodes();
-	setupMeshes();
 	setupAnimations();
 
 	return true;
@@ -45,7 +44,6 @@ bool Scene::load(const ofBuffer& buffer, bool optimize, const char* extension) {
 void Scene::unload() {
 	nodes.clear();
 	nodeNames.clear();
-	meshes.clear();
 	resource.reset();
 	
 	if (scene) {
@@ -55,13 +53,6 @@ void Scene::unload() {
 }
 
 void Scene::dumpScene() {
-	cout << "==== Mesh ====" << endl;
-	for (int i = 0; i < meshes.size(); i++) {
-		printf("%03i: %s\n", i, meshes[i]->getName().c_str());
-	}
-
-	cout << endl;
-
 	cout << "==== Node ====" << endl;
 	for (int i = 0; i < nodeNames.size(); i++) {
 		printf("%03i: %s\n", i, nodeNames[i].c_str());
@@ -75,10 +66,6 @@ void Scene::update() {
 void Scene::update(float sec) {
 	if (root_node) {
 		root_node->updateNodeAnimationRecursive(root_node.get(), sec);
-	}
-	
-	for (int i = 0; i < meshes.size(); i++) {
-		meshes[i]->update();
 	}
 }
 
@@ -118,28 +105,6 @@ void Scene::setupNodes() {
 	root_node = nodeSetupVisiter(this, scene->mRootNode, NULL);
 }
 
-void Scene::setupMeshes() {
-	meshes.clear();
-
-	for (int i = 0; i < scene->mNumMeshes; i++) {
-		aiMesh* mesh = scene->mMeshes[i];
-		Mesh::Ref o = Mesh::Ref(new Mesh(this, mesh));
-		meshes.push_back(o);
-	}
-
-	map<string, Node::Ref>::iterator it = nodes.begin();
-	while (it != nodes.end()) {
-		Node::Ref& o = it->second;
-		aiNode *n = o->get();
-		
-		for (int i = 0; i < n->mNumMeshes; i++) {
-			unsigned int id = n->mMeshes[i];
-			o->addMeshReference(meshes[id].get());
-		}
-		
-		it++;
-	}
-}
 void Scene::setupAnimations() {
 	duration = 0;
 	

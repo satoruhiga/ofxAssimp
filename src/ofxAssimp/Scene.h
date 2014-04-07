@@ -31,9 +31,6 @@ public:
 
 	inline const aiScene* get() const { return scene; }
 
-	size_t getNumMesh() const { return meshes.size(); }
-	Mesh::Ref getMesh(size_t index) { return meshes.at(index); }
-
 	inline const vector<string>& getNodeNames() const { return nodeNames; }
 	Node::Ref getNodeByName(const string& name){
 		if (nodes.find(name) == nodes.end()) return Node::Ref();
@@ -44,8 +41,6 @@ protected:
 	const aiScene* scene;
 
 	ofFile file;
-
-	vector<Mesh::Ref> meshes;
 
 	vector<string> nodeNames;
 	map<string, Node::Ref> nodes;
@@ -59,7 +54,6 @@ protected:
 
 	void setupResources();
 	void setupNodes();
-	void setupMeshes();
 	void setupAnimations();
 };
 

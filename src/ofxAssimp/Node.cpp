@@ -6,10 +6,11 @@
 OFX_ASSIMP_BEGIN_NAMESPACE
 
 Node::Node(Scene* scene, aiNode* node, Node* parent)
-	: scene(scene)
-	, node(node)
+	: node(node)
 	, parent(parent) {
 	name = node->mName.data;
+
+	setupMesh(scene, node);
 
 	if (parent) {
 		parent->children.push_back(this);
@@ -19,9 +20,15 @@ Node::Node(Scene* scene, aiNode* node, Node* parent)
 	updateGlobalMatrixCache();
 }
 
+void Node::update() {
+	for (int i = 0; i < meshes.size(); i++) {
+		meshes[i]->update();
+	}
+}
+
 void Node::draw() {
 	if (meshes.empty()) return;
-	
+
 	ofPushMatrix();
 	{
 		ofMultMatrix(global_rigid_transform);
@@ -142,12 +149,11 @@ void Node::updateGlobalMatrixCache() {
 	global_rigid_transform.setRotate(global_matrix_cache.getRotate());
 }
 
-void Node::addMeshReference(Mesh* mesh) {
-	if (find(meshes.begin(), meshes.end(), mesh) != meshes.end()) return;
-	meshes.push_back(mesh);
-}
-
 void Node::updateNodeAnimation(float sec) {
+	for (int i = 0; i < meshes.size(); i++) {
+		meshes[i]->update();
+	}
+
 	if (animation.empty()) return;
 
 	map<double, ofMatrix4x4>::iterator it =
@@ -164,6 +170,17 @@ void Node::updateNodeAnimationRecursive(Node* node, float sec) {
 	for (int i = 0; i < node->children.size(); i++) {
 		Node* child = node->children[i];
 		updateNodeAnimationRecursive(child, sec);
+	}
+}
+
+void Node::setupMesh(Scene* scene, aiNode* node) {
+	for (int i = 0; i < node->mNumMeshes; i++) {
+		unsigned int mesh_id = node->mMeshes[i];
+		const aiScene* s = scene->get();
+		aiMesh* m = s->mMeshes[mesh_id];
+
+		Mesh::Ref o = Mesh::Ref(new Mesh(scene, m));
+		meshes.push_back(o);
 	}
 }
 
