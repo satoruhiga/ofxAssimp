@@ -4,6 +4,8 @@
 
 OFX_ASSIMP_BEGIN_NAMESPACE
 
+class Scene;
+
 class Material {
 public:
 	Material()
@@ -53,6 +55,8 @@ class Resource {
 public:
 	typedef ofPtr<Resource> Ref;
 	vector<Material> materials;
+	
+	Resource(Scene* scene, ofFile& file);
 };
 
 OFX_ASSIMP_END_NAMESPACE
