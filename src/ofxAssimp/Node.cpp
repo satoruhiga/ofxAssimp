@@ -21,8 +21,14 @@ Node::Node(Scene* scene, aiNode* node, Node* parent)
 }
 
 void Node::update() {
-	for (int i = 0; i < meshes.size(); i++) {
-		meshes[i]->update();
+	updateGlobalMatrixCache();
+	
+	if (is_dirty) {
+		is_dirty = false;
+		
+		for (int i = 0; i < meshes.size(); i++) {
+			meshes[i]->update();
+		}
 	}
 }
 
@@ -147,29 +153,29 @@ void Node::updateGlobalMatrixCache() {
 	global_rigid_transform.makeIdentityMatrix();
 	global_rigid_transform.setTranslation(global_matrix_cache.getTranslation());
 	global_rigid_transform.setRotate(global_matrix_cache.getRotate());
-}
-
-void Node::updateNodeAnimation(float sec) {
+	
+	for (int i = 0; i < children.size(); i++) {
+		Node* child = children[i];
+		child->updateGlobalMatrixCache();
+	}
+	
 	for (int i = 0; i < meshes.size(); i++) {
 		meshes[i]->update();
 	}
-
-	if (animation.empty()) return;
-
-	map<double, ofMatrix4x4>::iterator it =
-		animation.lower_bound(sec * tick_par_second);
-	if (it == animation.end()) return;
-
-	matrix = it->second;
 }
 
-void Node::updateNodeAnimationRecursive(Node* node, float sec) {
-	node->updateNodeAnimation(sec);
-	node->updateGlobalMatrixCache();
-
-	for (int i = 0; i < node->children.size(); i++) {
-		Node* child = node->children[i];
-		updateNodeAnimationRecursive(child, sec);
+void Node::updateNodeAnimation(float sec) {
+	if (!animation.empty()) {
+		map<double, ofMatrix4x4>::iterator it =
+		animation.lower_bound(sec * tick_par_second);
+		if (it == animation.end()) return;
+		
+		setMatrix(it->second);
+	}
+	
+	for (int i = 0; i < children.size(); i++) {
+		Node* child = children[i];
+		child->updateNodeAnimation(sec);
 	}
 }
 

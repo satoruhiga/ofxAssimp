@@ -30,12 +30,15 @@ public:
 	void debugDraw();
 
 	inline const aiScene* get() const { return scene; }
+	Node::Ref getRootNode() const { return root_node; }
 
 	inline const vector<string>& getNodeNames() const { return nodeNames; }
 	Node::Ref getNodeByName(const string& name){
 		if (nodes.find(name) == nodes.end()) return Node::Ref();
 		return nodes[name];
 	}
+    
+    float getDuration() const { return duration; }
 
 protected:
 	const aiScene* scene;
@@ -48,7 +51,8 @@ protected:
 
 	Resource::Ref resource;
 	
-	double duration;
+	float duration;
+	float play_head;
 
 	static Node::Ref nodeSetupVisiter(Scene* s, aiNode* node, Node* parent);
 

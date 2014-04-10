@@ -27,6 +27,8 @@ public:
 	const aiNode* get() const { return node; }
 	
 	const ofMatrix4x4& getMatrix() const { return matrix; }
+	void setMatrix(const ofMatrix4x4& m) { matrix = m; is_dirty = true; }
+	
 	const ofMatrix4x4& getGlobalMatrix() const { return global_matrix_cache; }
 	const ofMatrix4x4& getGlobalRigidTransformMatrix() const { return global_rigid_transform; }
 
@@ -40,6 +42,7 @@ private:
 	aiNode* node;
 	
 	string name;
+	bool is_dirty;
 	
 	Node *parent;
 	vector<Node*> children;
@@ -55,8 +58,6 @@ private:
 	double tick_par_second;
 	map<double, ofMatrix4x4> animation;
 	void updateNodeAnimation(float sec);
-	
-	static void updateNodeAnimationRecursive(Node *node, float sec);
 };
 
 OFX_ASSIMP_END_NAMESPACE

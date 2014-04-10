@@ -6,7 +6,10 @@
 OFX_ASSIMP_BEGIN_NAMESPACE
 
 Scene::Scene()
-	: scene(NULL) {}
+	: scene(NULL)
+    , duration(0)
+    , play_head(0)
+    {}
 Scene::~Scene() { unload(); }
 
 bool Scene::load(string path, bool optimize) {
@@ -45,6 +48,12 @@ void Scene::unload() {
 	nodes.clear();
 	nodeNames.clear();
 	resource.reset();
+    root_node.reset();
+    
+    duration = 0;
+    play_head = 0;
+    
+    file = ofFile();
 	
 	if (scene) {
 		aiReleaseImport(scene);
@@ -64,8 +73,12 @@ void Scene::update() {
 }
 
 void Scene::update(float sec) {
+	if (play_head == sec) return;
+	play_head = sec;
+	
 	if (root_node) {
-		root_node->updateNodeAnimationRecursive(root_node.get(), sec);
+		root_node->updateNodeAnimation(sec);
+		root_node->update();
 	}
 }
 
@@ -107,6 +120,7 @@ void Scene::setupNodes() {
 
 void Scene::setupAnimations() {
 	duration = 0;
+	play_head = 0;
 	
 	for (int i = 0; i < scene->mNumAnimations; i++) {
 		aiAnimation* anim = scene->mAnimations[i];
