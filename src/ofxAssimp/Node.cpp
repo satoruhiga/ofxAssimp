@@ -37,7 +37,7 @@ void Node::draw() {
 
 	ofPushMatrix();
 	{
-		ofMultMatrix(global_rigid_transform);
+		ofMultMatrix(global_matrix_cache);
 		for (int i = 0; i < meshes.size(); i++) {
 			meshes[i]->draw();
 		}

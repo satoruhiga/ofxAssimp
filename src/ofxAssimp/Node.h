@@ -33,9 +33,12 @@ public:
 	const ofMatrix4x4& getGlobalRigidTransformMatrix() const { return global_rigid_transform; }
 
 	Node* getParent() const { return parent; }
+	vector<Node*> getChildren() const { return children; }
 	
 	inline bool hasAnimation() const { return !animation.empty(); }
 	inline bool hasMesh() const { return !meshes.empty(); }
+	
+	const vector<Mesh::Ref>& getMeshes() const { return meshes; }
 	
 private:
 	

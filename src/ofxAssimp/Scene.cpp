@@ -12,12 +12,12 @@ Scene::Scene()
     {}
 Scene::~Scene() { unload(); }
 
-bool Scene::load(string path, bool optimize) {
+bool Scene::load(string path, bool optimize, Handedness handness) {
 	file.open(path);
-	return load(file.readToBuffer(), optimize, file.getExtension().c_str());
+	return load(file.readToBuffer(), optimize, handness, file.getExtension().c_str());
 }
 
-bool Scene::load(const ofBuffer& buffer, bool optimize, const char* extension) {
+bool Scene::load(const ofBuffer& buffer, bool optimize, Handedness handness, const char* extension) {
 	unload();
 
 	unsigned int flags = aiProcessPreset_TargetRealtime_MaxQuality |
@@ -29,7 +29,7 @@ bool Scene::load(const ofBuffer& buffer, bool optimize, const char* extension) {
 				 aiProcess_RemoveRedundantMaterials;
 	}
 
-	if (ofGetCoordHandedness() == OF_LEFT_HANDED) {
+	if (handness == LEFT_HANDED) {
 		flags |= aiProcess_ConvertToLeftHanded;
 	}
 

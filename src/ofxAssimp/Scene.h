@@ -13,11 +13,18 @@ class Scene {
 	friend class Mesh;
 
 public:
+	
+	enum Handedness
+	{
+		LEFT_HANDED,
+		RIGHT_HANDED
+	};
+	
 	Scene();
 	~Scene();
 
-	bool load(string path, bool optimize = false);
-	bool load(const ofBuffer& buffer, bool optimize = false,
+	bool load(string path, bool optimize = false, Handedness handness = RIGHT_HANDED);
+	bool load(const ofBuffer& buffer, bool optimize = false, Handedness handness = RIGHT_HANDED,
 			  const char* extension = "");
 	void unload();
 
