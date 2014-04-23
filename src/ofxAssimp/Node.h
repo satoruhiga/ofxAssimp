@@ -30,7 +30,6 @@ public:
 	void setMatrix(const ofMatrix4x4& m) { matrix = m; is_dirty = true; }
 	
 	const ofMatrix4x4& getGlobalMatrix() const { return global_matrix_cache; }
-	const ofMatrix4x4& getGlobalRigidTransformMatrix() const { return global_rigid_transform; }
 
 	Node* getParent() const { return parent; }
 	vector<Node*> getChildren() const { return children; }
@@ -52,7 +51,7 @@ private:
 
 	void setupNodeAnimation(aiNodeAnim* anim, double tick_par_second);
 
-	ofMatrix4x4 matrix, global_matrix_cache, global_rigid_transform;
+	ofMatrix4x4 matrix, global_matrix_cache;
 	void updateGlobalMatrixCache();
 	
 	vector<Mesh::Ref> meshes;

@@ -57,7 +57,7 @@ void Node::debugDraw() {
 
 	ofPushMatrix();
 	{
-		ofMultMatrix(global_rigid_transform);
+		ofMultMatrix(global_matrix_cache);
 
 		for (int i = 0; i < meshes.size(); i++) {
 			meshes[i]->debugDraw();
@@ -150,10 +150,6 @@ void Node::updateGlobalMatrixCache() {
 		global_matrix_cache = matrix * parent->global_matrix_cache;
 	}
 
-	global_rigid_transform.makeIdentityMatrix();
-	global_rigid_transform.setTranslation(global_matrix_cache.getTranslation());
-	global_rigid_transform.setRotate(global_matrix_cache.getRotate());
-	
 	for (int i = 0; i < children.size(); i++) {
 		Node* child = children[i];
 		child->updateGlobalMatrixCache();

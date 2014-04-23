@@ -20,12 +20,11 @@ bool Scene::load(string path, bool optimize, Handedness handness) {
 bool Scene::load(const ofBuffer& buffer, bool optimize, Handedness handness, const char* extension) {
 	unload();
 
-	unsigned int flags = aiProcessPreset_TargetRealtime_MaxQuality |
-						 aiProcess_Triangulate;
+	unsigned int flags = aiProcessPreset_TargetRealtime_MaxQuality;
 
 	if (optimize) {
-		flags |= aiProcess_ImproveCacheLocality | aiProcess_OptimizeGraph |
-				 aiProcess_OptimizeMeshes | aiProcess_JoinIdenticalVertices |
+		flags |= aiProcess_ImproveCacheLocality | 
+				 aiProcess_JoinIdenticalVertices |
 				 aiProcess_RemoveRedundantMaterials;
 	}
 
@@ -35,6 +34,11 @@ bool Scene::load(const ofBuffer& buffer, bool optimize, Handedness handness, con
 
 	scene = aiImportFileFromMemory(buffer.getBinaryBuffer(), buffer.size(),
 								   flags, extension);
+	string err_str = aiGetErrorString();
+	if (!err_str.empty())
+	{
+		ofLogError("ofxAssimp::Scene::load") << err_str;
+	}
 	assert(scene);
 	
 	setupResources();

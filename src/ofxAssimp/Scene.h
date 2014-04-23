@@ -23,8 +23,8 @@ public:
 	Scene();
 	~Scene();
 
-	bool load(string path, bool optimize = false, Handedness handness = RIGHT_HANDED);
-	bool load(const ofBuffer& buffer, bool optimize = false, Handedness handness = RIGHT_HANDED,
+	bool load(string path, bool optimize = true, Handedness handness = RIGHT_HANDED);
+	bool load(const ofBuffer& buffer, bool optimize = true, Handedness handness = RIGHT_HANDED,
 			  const char* extension = "");
 	void unload();
 
@@ -32,6 +32,7 @@ public:
 
 	void update();
 	void update(float sec);
+	float getDuration() const { return duration; }
 
 	void draw();
 	void debugDraw();
@@ -44,8 +45,6 @@ public:
 		if (nodes.find(name) == nodes.end()) return Node::Ref();
 		return nodes[name];
 	}
-    
-    float getDuration() const { return duration; }
 
 protected:
 	const aiScene* scene;
